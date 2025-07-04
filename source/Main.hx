@@ -5,9 +5,13 @@ import openfl.display.Sprite;
 
 class Main extends Sprite
 {
+	public static var displayLayers:DisplayLayers;
+
 	public function new()
 	{
 		super();
-		addChild(new FlxGame(0, 0, PlayState));
+
+		// Standard game resolution - can be scaled to fullscreen
+		addChild(new FlxGame(1280, 720, PlayState));
 	}
 }

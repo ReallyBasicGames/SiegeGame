@@ -1,0 +1,123 @@
+{
+	"identifier": "Siege",
+	"uniqueIdentifer": "a2b00c70-66b0-11ec-9cd7-cfc05854da53",
+	"x": -1,
+	"y": -1,
+	"width": 848,
+	"height": 736,
+	"bgColor": "#222225",
+	"neighbourLevels": [],
+	"customFields" : {},
+	"layers": [
+		"Walls.png"
+	],
+	"entities": {
+		"PlayerSpawn": [
+			{
+				"id": "PlayerSpawn",
+				"iid": "c61974c0-3740-11f0-beee-4da783f399b8",
+				"layer": "Characters",
+				"x": 256,
+				"y": 144,
+				"width": 16,
+				"height": 16,
+				"color": 39387,
+				"customFields" : {}
+			}
+		],
+		"InfilPoint": [
+			{
+				"id": "InfilPoint",
+				"iid": "6d059630-3740-11f0-a86a-f7944a83be9c",
+				"layer": "Characters",
+				"x": 288,
+				"y": 0,
+				"width": 16,
+				"height": 16,
+				"color": 11882632,
+				"customFields" : {}
+			},
+			{
+				"id": "InfilPoint",
+				"iid": "6d4d2680-3740-11f0-a86a-87faeff786f7",
+				"layer": "Characters",
+				"x": 272,
+				"y": 0,
+				"width": 16,
+				"height": 16,
+				"color": 11882632,
+				"customFields" : {}
+			},
+			{
+				"id": "InfilPoint",
+				"iid": "6d9971c0-3740-11f0-a86a-4503f6f4d5c5",
+				"layer": "Characters",
+				"x": 256,
+				"y": 0,
+				"width": 16,
+				"height": 16,
+				"color": 11882632,
+				"customFields" : {}
+			},
+			{
+				"id": "InfilPoint",
+				"iid": "6ddbaae0-3740-11f0-a86a-677362c47d20",
+				"layer": "Characters",
+				"x": 240,
+				"y": 0,
+				"width": 16,
+				"height": 16,
+				"color": 11882632,
+				"customFields" : {}
+			},
+			{
+				"id": "InfilPoint",
+				"iid": "6e5d5e00-3740-11f0-a86a-83c7865917e9",
+				"layer": "Characters",
+				"x": 224,
+				"y": 0,
+				"width": 16,
+				"height": 16,
+				"color": 11882632,
+				"customFields" : {}
+			},
+			{
+				"id": "InfilPoint",
+				"iid": "77212c10-3740-11f0-a86a-3764c962774f",
+				"layer": "Characters",
+				"x": 304,
+				"y": 0,
+				"width": 16,
+				"height": 16,
+				"color": 11882632,
+				"customFields" : {}
+			}
+		],
+		"Stash": [
+			{
+				"id": "Stash",
+				"iid": "91966560-3740-11f0-a86a-455c6c047064",
+				"layer": "Characters",
+				"x": 432,
+				"y": 160,
+				"width": 16,
+				"height": 16,
+				"color": 12087120,
+				"customFields" : {}
+			}
+		],
+		"Forge": [
+			{
+				"id": "Forge",
+				"iid": "93749b40-3740-11f0-a86a-51664a27c2ba",
+				"layer": "Characters",
+				"x": 96,
+				"y": 160,
+				"width": 16,
+				"height": 16,
+				"color": 9149364,
+				"customFields" : {}
+			}
+		]
+	}
+}

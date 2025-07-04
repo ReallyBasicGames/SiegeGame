@@ -1,0 +1,55 @@
+{
+	"identifier": "Siege",
+	"uniqueIdentifer": "a2b00c70-66b0-11ec-9cd7-cfc05854da53",
+	"x": -1,
+	"y": -1,
+	"width": 848,
+	"height": 736,
+	"bgColor": "#222225",
+	"neighbourLevels": [],
+	"customFields" : {},
+	"layers": [
+		"Walls.png"
+	],
+	"entities": {
+		"PlayerSpawn": [
+			{
+				"id": "PlayerSpawn",
+				"iid": "c61974c0-3740-11f0-beee-4da783f399b8",
+				"layer": "Characters",
+				"x": 352,
+				"y": 144,
+				"width": 16,
+				"height": 16,
+				"color": 39387,
+				"customFields" : {}
+			}
+		],
+		"ExtractionPoint": [
+			{
+				"id": "ExtractionPoint",
+				"iid": "cee61c70-3740-11f0-beee-73dd4bd95d58",
+				"layer": "Characters",
+				"x": 464,
+				"y": 464,
+				"width": 16,
+				"height": 16,
+				"color": 6539085,
+				"customFields" : {}
+			}
+		],
+		"EnemySpawner": [
+			{
+				"id": "EnemySpawner",
+				"iid": "d0453740-3740-11f0-beee-9f792a596878",
+				"layer": "Characters",
+				"x": 480,
+				"y": 32,
+				"width": 16,
+				"height": 16,
+				"color": 16711748,
+				"customFields" : {}
+			}
+		]
+	}
+}

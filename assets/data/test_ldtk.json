@@ -1,0 +1,41 @@
+{
+  "levels": [
+    {
+      "identifier": "Level_0",
+      "pxWid": 256,
+      "pxHei": 192,
+      "layerInstances": [
+        {
+          "__identifier": "Background",
+          "__type": "IntGrid",
+          "intGridCsv": [
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 2, 0, 0, 2, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 3, 3, 0, 0, 1,
+            1, 1, 1, 1, 1, 1, 1, 1
+          ]
+        },
+        {
+          "__identifier": "Entities",
+          "__type": "Entities",
+          "entityInstances": [
+            {
+              "__identifier": "Player",
+              "px": [64, 64]
+            },
+            {
+              "__identifier": "Enemy",
+              "px": [160, 96]
+            },
+            {
+              "__identifier": "Chest",
+              "px": [96, 128]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

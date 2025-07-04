@@ -4,84 +4,100 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.nape.FlxNapeSpace;
+import flixel.addons.nape.FlxNapeSprite;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import nape.phys.BodyType;
 import openfl.Assets;
 
-class PlayState extends FlxState
+/**
+ * Player's base area - the Stash
+ * A safe area where players can manage equipment, items, and return to missions
+ */
+class StashState extends FlxState
 {
 	private var fpsGraph:FPSGraph;
 	private var debugText:FlxText;
 
 	// Camera lookahead settings
-	private var cameraLookaheadWeight:Float = 0.4; // 0 = follow player only, 1 = follow exact midpoint
+	private var cameraLookaheadWeight:Float = 0.4;
 
 	override public function create()
 	{
 		super.create();
-		trace("PlayState: Initializing basic Nape physics for player only");
+		trace("StashState: Initializing player's stash area");
 
 		Main.displayLayers = new DisplayLayers();
 
-		// Initialize Nape physics world (minimal setup for player only)
+		// Initialize Nape physics world
 		FlxNapeSpace.init();
 		FlxNapeSpace.space.gravity.setxy(0, 0); // No gravity for top-down game
+		trace("StashState: Nape space initialized");
 
-		trace("PlayState: Nape space initialized for player movement only");
+		// Set background color to distinguish from PlayState
+		FlxG.camera.bgColor = FlxColor.fromRGB(20, 30, 40); // Dark blue-gray
 
-		// Add all display layers to this state
+		// Add all display layers to this state FIRST
 		Main.displayLayers.addAllToState(this);
-		trace("PlayState: Display layers added");
+		trace("StashState: Display layers added");
 
-		// Test map loading
-		var testMap = SiegeMapLoader.Load("assets/data/test_map.json");
-		trace("Loaded map with " + testMap.tiles.length + " tiles and " + testMap.spawns.length + " spawns");
-
-		// Test LDTK importer and render map
-		var ldtkJson = Assets.getText("assets/data/SiegeProjectJSONMapTest.ldtk");
-		var mapData = LdtkImporter.parse(ldtkJson);
-		trace("LDTK Map: " + mapData.width + "x" + mapData.height + " with " + mapData.entities.length + " entities");
-
-		// Render the map objects (walls with physics, other objects visual only)
-		trace("PlayState: Starting map rendering");
-		MapRenderer.renderMap(mapData);
-		trace("PlayState: Map rendering completed");
-
-		// Debug: Check Nape space state after map creation
-		if (FlxNapeSpace.space != null && FlxNapeSpace.space.bodies != null)
-		{
-			trace("PlayState: Total Nape bodies in space: " + FlxNapeSpace.space.bodies.length + " (walls + 1 player)");
-		}
+		// Load and render the stash map
+		loadStashMap();
 
 		// Add FPS graph for performance monitoring
 		fpsGraph = new FPSGraph();
 		add(fpsGraph);
-		trace("PlayState: FPS graph initialized");
+		trace("StashState: FPS graph initialized");
 
 		// Add debug text for PlayerBody statistics
 		debugText = new FlxText(FlxG.width - 200, 10, 190, "");
 		debugText.setFormat(null, 12, 0xFFFFFFFF, "right");
 		debugText.scrollFactor.set(0, 0); // Keep fixed on screen
 		add(debugText);
-		trace("PlayState: Debug text initialized");
+		trace("StashState: Debug text initialized");
+	}
+
+	private function loadStashMap():Void
+	{
+		// Load LDTK stash map
+		var ldtkJson = Assets.getText("assets/data/SiegeStashJSONMap.ldtk");
+		var mapData = LdtkImporter.parse(ldtkJson);
+		trace("StashState: LDTK Stash Map: " + mapData.width + "x" + mapData.height + " with " + mapData.entities.length + " entities");
+
+		// Initialize navigation systems for the stash
+		NavMesh.initialize(mapData.backgroundGrid);
+		trace("StashState: Navigation systems initialized");
+
+		// Render the stash map objects (walls with physics, other objects visual only)
+		trace("StashState: Starting stash map rendering");
+		MapRenderer.renderMap(mapData);
+		trace("StashState: Stash map rendering completed");
+
+		// Debug: Check Nape space state after map creation
+		if (FlxNapeSpace.space != null && FlxNapeSpace.space.bodies != null)
+		{
+			trace("StashState: Total Nape bodies in space: " + FlxNapeSpace.space.bodies.length + " (walls and objects)");
+		}
 	}
 
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		// FlxNapeSpace automatically steps the world during super.update()
-		// Only player physics should be active now
-
-		// Update NavMesh for localized updates
-		NavMesh.update(elapsed);
 
 		// Update camera to follow player with mouse lookahead
 		updateCameraFollow(elapsed);
 
-		// Check for extraction point interaction
-		checkExtractionPointInteraction();
+		// Check for infiltration point interaction
+		checkInfilPointInteraction();
 
 		// Update debug text with PlayerBody statistics
 		updateDebugText();
+
+		// Toggle fullscreen with G key
+		if (FlxG.keys.justPressed.G)
+		{
+			toggleFullscreen();
+		}
 
 		// Toggle FPS graph with F key
 		if (FlxG.keys.justPressed.F)
@@ -92,13 +108,7 @@ class PlayState extends FlxState
 			}
 		}
 
-		// Toggle fullscreen with G key
-		if (FlxG.keys.justPressed.G)
-		{
-			toggleFullscreen();
-		}
-
-		// Reset FPS graph with T key
+		// Reset FPS graph with T key (moved from R to avoid conflict with resize)
 		if (FlxG.keys.justPressed.T)
 		{
 			if (fpsGraph != null)
@@ -133,44 +143,30 @@ class PlayState extends FlxState
 			cameraLookaheadWeight = 1.0;
 			trace("Camera lookahead weight: " + cameraLookaheadWeight + " (follow exact midpoint)");
 		}
-
-		// Update debug text with PlayerBody stats
-		updateDebugText();
 	}
 
 	/**
-	 * Update debug text with PlayerBody creation statistics
+	 * Check if player is touching the infiltration point and handle transition to PlayState
 	 */
-	private function updateDebugText():Void
+	private function checkInfilPointInteraction():Void
 	{
-		if (debugText != null)
-		{
-			debugText.text = "PlayerBody Debug:\n" + "Times Created: " + PlayerBody.timesCreated + "\n" + "Times New: " + PlayerBody.timesNew;
-		}
-	}
-
-	/**
-	 * Check if player is touching the extraction point and handle transition to StashState
-	 */
-	private function checkExtractionPointInteraction():Void
-	{
-		if (PlayerBody.instance == null || MapRenderer.extractionPoint == null)
+		if (PlayerBody.instance == null || MapRenderer.infiltrationPoint == null)
 			return;
 
-		// Check if player is touching the extraction point using simple distance check
+		// Check if player is touching the infiltration point using simple distance check
 		var playerCenterX = PlayerBody.instance.getCenterX();
 		var playerCenterY = PlayerBody.instance.getCenterY();
-		var extractionCenterX = MapRenderer.extractionPoint.x + MapRenderer.extractionPoint.width * 0.5;
-		var extractionCenterY = MapRenderer.extractionPoint.y + MapRenderer.extractionPoint.height * 0.5;
+		var infilCenterX = MapRenderer.infiltrationPoint.x + MapRenderer.infiltrationPoint.width * 0.5;
+		var infilCenterY = MapRenderer.infiltrationPoint.y + MapRenderer.infiltrationPoint.height * 0.5;
 
-		var distance = Math.sqrt(Math.pow(playerCenterX - extractionCenterX, 2) + Math.pow(playerCenterY - extractionCenterY, 2));
+		var distance = Math.sqrt(Math.pow(playerCenterX - infilCenterX, 2) + Math.pow(playerCenterY - infilCenterY, 2));
 
 		if (distance < 20) // Close enough to interact
 		{
-			// Show interaction prompt and handle extraction
+			// Show interaction prompt and handle infiltration
 			if (FlxG.keys.justPressed.SPACE)
 			{
-				trace("PlayState: Player extracting - switching to StashState");
+				trace("StashState: Player infiltrating - switching to PlayState");
 
 				// Remove all display layers from current state
 				Main.displayLayers.removeAllFromState(this);
@@ -181,9 +177,9 @@ class PlayState extends FlxState
 				// Ensure player is properly destroyed
 				PlayerBody.destroyInstance();
 
-				Main.displayLayers = null; // ensure the display layers are no longer used, just in case there are any objects that weren't removed
+				Main.displayLayers = null;
 
-				FlxG.switchState(() -> new StashState());
+				FlxG.switchState(() -> new PlayState());
 			}
 			else
 			{
@@ -209,12 +205,9 @@ class PlayState extends FlxState
 		var mouseWorldY = FlxG.mouse.y + FlxG.camera.scroll.y;
 
 		// Scale the lookahead weight to a practical range (0-0.5 instead of 0-1)
-		// This prevents the camera from becoming unplayable at high values
 		var scaledWeight = cameraLookaheadWeight * 0.5;
 
 		// Calculate the weighted lookahead point
-		// When weight = 0: follows player exactly
-		// When weight = 1: follows at 0.5 distance from player toward mouse (practical maximum)
 		var lookaheadX = playerX + (mouseWorldX - playerX) * scaledWeight;
 		var lookaheadY = playerY + (mouseWorldY - playerY) * scaledWeight;
 
@@ -222,8 +215,8 @@ class PlayState extends FlxState
 		var targetX = lookaheadX - FlxG.width * 0.5;
 		var targetY = lookaheadY - FlxG.height * 0.5;
 
-		// Fast lerp factor (higher = more responsive, lower = smoother)
-		var lerpFactor = 8.0; // Adjust this value to change camera responsiveness
+		// Fast lerp factor
+		var lerpFactor = 8.0;
 
 		// Lerp camera position towards target
 		FlxG.camera.scroll.x += (targetX - FlxG.camera.scroll.x) * lerpFactor * elapsed;
@@ -233,6 +226,17 @@ class PlayState extends FlxState
 	private function toggleFullscreen():Void
 	{
 		FlxG.fullscreen = !FlxG.fullscreen;
-		trace("PlayState: Fullscreen toggled to " + FlxG.fullscreen);
+		trace("StashState: Fullscreen toggled to " + FlxG.fullscreen);
+	}
+
+	/**
+	 * Update debug text with PlayerBody creation statistics
+	 */
+	private function updateDebugText():Void
+	{
+		if (debugText != null)
+		{
+			debugText.text = "PlayerBody Debug:\n" + "Times Created: " + PlayerBody.timesCreated + "\n" + "Times New: " + PlayerBody.timesNew;
+		}
 	}
 }
